@@ -6,10 +6,10 @@ RUN echo GIT_TAG=${GIT_TAG}
 
 WORKDIR /opt/app
 
+COPY go.mod go.sum ./
+RUN go mod download
 COPY . .
 
-RUN go get github.com/gorilla/mux
-RUN go get github.com/sirupsen/logrus
 RUN CGO_ENABLED=0 GOOS=linux go build
 
 ######## 
