@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"net/http/httputil"
 	"os"
 	"strconv"
 	"time"
@@ -45,7 +46,7 @@ func main() {
 	// setup our REST routes
 	router := mux.NewRouter()
 	router.Path("/").
-		Methods("POST").
+		//Methods("POST").
 		Schemes("http").
 		HandlerFunc(ProcessSlackRequest)
 
@@ -74,6 +75,13 @@ func validateRequestSignature(req *http.Request) (bool, error) {
 
 // ProcessSlackRequest ... http handler for processing the inbound slack POST payload
 func ProcessSlackRequest(resWriter http.ResponseWriter, req *http.Request) {
+
+	// Save a copy of this request for debugging.
+	requestDump, err := httputil.DumpRequest(req, true)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(requestDump))
 
 	// first lets get the credentials off the request
 	validated, err := validateRequestSignature(req)
