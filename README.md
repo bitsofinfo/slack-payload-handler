@@ -18,6 +18,12 @@ Usage of ./slack-payload-handler:
         Optional, port to listen on, default 8080 (default 8080)
 ```
 
+# Docker example
+```
+docker run -p 8080:8080 -it bitsofinfo/slack-payload-handler \
+  slack-payload-handler --debug-request true --debug-response true --listen-port 8080
+```
+
 # Example
 
 ```
