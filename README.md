@@ -1,6 +1,6 @@
 # slack-payload-handler
 
-![Docker Automated build](https://img.shields.io/docker/automated/bitsofinfo/slack-payload-handler)
+![Docker build](https://img.shields.io/docker/automated/bitsofinfo/slack-payload-handler)(https://hub.docker.com/repository/docker/bitsofinfo/slack-payload-handler)
 
 Simple utility you can use as a custom [Tekton triggers webhook interceptor](https://github.com/tektoncd/triggers/blob/master/docs/eventlisteners.md#Webhook-Interceptors) when receiving [Slack interactive message payloads](https://api.slack.com/interactivity/handling#payloads) in response to user interaction (i.e. clicking on buttons etc) to trigger things in your Tekton CICD system.
 
