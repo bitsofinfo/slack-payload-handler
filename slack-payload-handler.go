@@ -16,7 +16,9 @@ import (
 )
 
 var (
-	listenPort int // port to listen on (flag opt)
+	listenPort    int          // port to listen on (flag opt)
+	debugRequest  bool = false // dumps raw request from slack to STDOUT
+	debugResponse bool = false // dumps returned/modified response to STDOUT
 )
 
 // Struct for JSON we retun to caller
@@ -32,6 +34,8 @@ func init() {
 
 	// cmd line args
 	flag.IntVar(&listenPort, "listen-port", 8080, "Optional, port to listen on, default 8080")
+	flag.BoolVar(&debugRequest, "debug-request", false, "Optional, print requests to STDOUT, default false")
+	flag.BoolVar(&debugRequest, "debug-response", false, "Optional, print responses to STDOUT, default false")
 
 	// logging options
 	log.SetFormatter(&log.JSONFormatter{})
@@ -46,7 +50,7 @@ func main() {
 	// setup our REST routes
 	router := mux.NewRouter()
 	router.Path("/").
-		//Methods("POST").
+		Methods("POST").
 		Schemes("http").
 		HandlerFunc(ProcessSlackRequest)
 
@@ -76,12 +80,14 @@ func validateRequestSignature(req *http.Request) (bool, error) {
 // ProcessSlackRequest ... http handler for processing the inbound slack POST payload
 func ProcessSlackRequest(resWriter http.ResponseWriter, req *http.Request) {
 
-	// Save a copy of this request for debugging.
-	requestDump, err := httputil.DumpRequest(req, true)
-	if err != nil {
-		fmt.Println(err)
+	// Save a copy of this request for debugging?
+	if debugRequest {
+		requestDump, err := httputil.DumpRequest(req, true)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(string(requestDump))
 	}
-	fmt.Println(string(requestDump))
 
 	// first lets get the credentials off the request
 	validated, err := validateRequestSignature(req)
@@ -90,28 +96,55 @@ func ProcessSlackRequest(resWriter http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var x map[string]interface{}
-	err = json.Unmarshal([]byte(req.FormValue("payload")), &x)
-	if err != nil {
-		fmt.Printf("Could not parse action response JSON: %v", err)
+	// extract json from the payload
+	var jsonPayload map[string]interface{}
+	var rawData []byte = []byte(req.FormValue("payload"))
+	if rawData != nil && len(rawData) > 0 {
+
+		if debugRequest {
+			fmt.Printf("\nJSON RECEIVED: \n%s\n\n", rawData)
+		}
+
+		err = json.Unmarshal(rawData, &jsonPayload)
+		if err != nil {
+			fmt.Printf("Could not parse Slack 'payload' into JSON: \n%v\n\n", err)
+		}
+	} else {
+		log.Error("HTTP POST contained no FormData body where payload=[data]")
+		return
+	}
+
+	if jsonPayload["actions"] == nil {
+		log.Error("HTTP POST JSON contained no 'actions' element'")
+		return
 	}
 
 	var actionValuesArr []string
 
-	var actionsArr []interface{} = x["actions"].([]interface{})
-	//fmt.Printf("%v", actionsArr[0]["value"])
+	var actionsArr []interface{} = jsonPayload["actions"].([]interface{})
 
 	for i := 0; i < len(actionsArr); i++ {
 		var actionMap map[string]interface{} = actionsArr[i].(map[string]interface{})
-		fmt.Printf("%v\n", actionMap["value"])
 		var theval string = actionMap["value"].(string)
 		actionValuesArr = append(actionValuesArr, theval)
 	}
 
-	x["action_values"] = actionValuesArr
+	jsonPayload["action_values"] = actionValuesArr
+
+	if debugResponse {
+		var jsonStr, err = json.Marshal(jsonPayload)
+		if err != nil {
+			fmt.Printf("Could not parse Slack 'payload' into JSON: \n %v", err)
+		} else if jsonStr != nil {
+			fmt.Printf("RESPONSE: \n%s", jsonStr)
+		}
+
+	}
+
+	log.Info(jsonPayload)
 
 	resWriter.Header().Set("Content-Type", "application/json")
 	resWriter.WriteHeader(http.StatusOK)
-	json.NewEncoder(resWriter).Encode(x)
+	json.NewEncoder(resWriter).Encode(jsonPayload)
 
 }

@@ -1,0 +1,160 @@
+{
+  "type": "block_actions",
+  "user": {
+    "id": "UXXXXXXX",
+    "username": "bitsofinfo",
+    "name": "bitsofinfo",
+    "team_id": "TXXXXXXXX"
+  },
+  "api_app_id": "AAA9900A",
+  "token": "xxxxx",
+  "container": {
+    "type": "message_attachment",
+    "message_ts": "2013301006.012600",
+    "attachment_id": 2,
+    "channel_id": "CXXXXXXXXX",
+    "is_ephemeral": false,
+    "is_app_unfurl": false,
+    "thread_ts": "2013298882.005600"
+  },
+  "trigger_id": "1210267526979.7495595396.f604b15f9fcf13e232f52061e3be7951",
+  "team": { "id": "TXXXXXXXX", "domain": "bitsofinfo-org" },
+  "channel": { "id": "CXXXXXXXXX", "name": "cicd-test" },
+  "message": {
+    "bot_id": "BXXXXX",
+    "type": "message",
+    "text": ":question:+(v1)+What+would+you+like+to+do+next?",
+    "user": "UXXXXXXX",
+    "ts": "2013301006.012600",
+    "team": "TXXXXXXXX",
+    "attachments": [
+      {
+        "id": 1,
+        "blocks": [
+          {
+            "type": "section",
+            "block_id": "BBVzZ",
+            "text": {
+              "type": "mrkdwn",
+              "text": "Rollback+to+PRIOR+STATE+in+stage-test1:\n\n++The+prior+*BB*+=+NOTHING",
+              "verbatim": false
+            }
+          },
+          {
+            "type": "actions",
+            "block_id": "KQhY",
+            "elements": [
+              {
+                "type": "button",
+                "action_id": "5Eur",
+                "text": {
+                  "type": "plain_text",
+                  "text": "rollback",
+                  "emoji": true
+                },
+                "style": "primary",
+                "value": "deploy-v1-buffalo|XXXXX"
+              }
+            ]
+          }
+        ],
+        "fallback": "[no+preview+available]"
+      },
+      {
+        "id": 2,
+        "blocks": [
+          {
+            "type": "section",
+            "block_id": "Z2f6",
+            "text": {
+              "type": "mrkdwn",
+              "text": "Continue+deploying+xyz-buffalo:5.1.2-1+in+stage-test1@aws-t1-dev-qa2",
+              "verbatim": false
+            }
+          },
+          {
+            "type": "actions",
+            "block_id": "lMt",
+            "elements": [
+              {
+                "type": "button",
+                "action_id": "Jnm",
+                "text": { "type": "plain_text", "text": "BB", "emoji": true },
+                "style": "primary",
+                "value": "deploy-v1-buffalo|XBYQ="
+              },
+              {
+                "type": "button",
+                "action_id": "y0n8f",
+                "text": { "type": "plain_text", "text": "BBV", "emoji": true },
+                "style": "primary",
+                "value": "deploy-v1-buffalo|XXZ="
+              },
+              {
+                "type": "button",
+                "action_id": "ddRBq",
+                "text": { "type": "plain_text", "text": "q1", "emoji": true },
+                "style": "primary",
+                "value": "deploy-v1-buffalo|XSSS="
+              }
+            ]
+          }
+        ],
+        "fallback": "[no+preview+available]"
+      },
+      {
+        "id": 3,
+        "blocks": [
+          {
+            "type": "section",
+            "block_id": "6qjC",
+            "text": {
+              "type": "mrkdwn",
+              "text": "Route+to+different+CICD+context:",
+              "verbatim": false
+            }
+          },
+          {
+            "type": "actions",
+            "block_id": "ncQ=",
+            "elements": [
+              {
+                "type": "button",
+                "action_id": "y2j",
+                "text": {
+                  "type": "plain_text",
+                  "text": "pre-prod",
+                  "emoji": true
+                },
+                "style": "primary",
+                "value": "promoteContext-v1_buffalo@xyz-buffalo-5.1.2-1-v1-stage-XXXXXXX=pre-prod"
+              },
+              {
+                "type": "button",
+                "action_id": "k1CT",
+                "text": { "type": "plain_text", "text": "prod", "emoji": true },
+                "style": "primary",
+                "value": "promoteContext-v1_buffalo@xyz-buffalo-5.1.2-1-v1-stage-XXXXXXX=prod"
+              }
+            ]
+          }
+        ],
+        "fallback": "[no+preview+available]"
+      }
+    ],
+    "thread_ts": "2013298882.005600",
+    "parent_user_id": "UXXXXXXX"
+  },
+  "response_url": "https://hooks.slack.com/actions/TXXXXXXXX/NOOOOOOO",
+  "actions": [
+    {
+      "action_id": "Jnm",
+      "block_id": "lMt",
+      "text": { "type": "plain_text", "text": "BB", "emoji": true },
+      "value": "deploy-v1-buffalo|XBYQ=",
+      "style": "primary",
+      "type": "button",
+      "action_ts": "2013302010.396163"
+    }
+  ]
+}
