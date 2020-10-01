@@ -2,9 +2,11 @@
 
 [![Docker build](https://img.shields.io/docker/cloud/automated/bitsofinfo/slack-payload-handler)](https://hub.docker.com/repository/docker/bitsofinfo/slack-payload-handler)
 
-Simple utility you can use as a custom [Tekton triggers webhook interceptor](https://github.com/tektoncd/triggers/blob/master/docs/eventlisteners.md#Webhook-Interceptors) when receiving [Slack interactive message payloads](https://api.slack.com/interactivity/handling#payloads) in response to user interaction (i.e. clicking on buttons etc) to trigger things in your Tekton CICD system.
+Simple utility you can use as a custom [Tekton triggers webhook interceptor](https://github.com/tektoncd/triggers/blob/master/docs/eventlisteners.md#Webhook-Interceptors) when receiving [Slack interactive message payloads](https://api.slack.com/interactivity/handling#payloads) in response to user interaction (i.e. clicking on buttons etc) to trigger things in your Tekton CICD system. It can also be used respond to [Slack slash commands](https://api.slack.com/interactivity/slash-commands#app_command_handling).
 
-For convience it lightly mutates the original JSON and adds an `action_values` property which is just an array of the selected `values` under `actions`. Completely ignorable if you don't want to use it.
+For Slack interactive message posts, for convience it lightly mutates the original JSON and adds an `action_values` property which is just an array of the selected `values` under `actions`. Completely ignorable if you don't want to use it.
+
+There are no additional mutations for Slack slash command posts.
 
 ## Usage
 
@@ -26,13 +28,26 @@ docker run -p 8080:8080 -it bitsofinfo/slack-payload-handler \
 
 ## Example
 
+Simulate a interactive message post:
 ```
 $> ./slack-payload-handler --debug-request true --debug-response true
 
 $> curl -k -X POST localhost:8080 --data-urlencode 'payload={"x":"b","actions":[{"value":"1"}]}'
 
 {"action_values":["1"],"actions":[{"value":"1"}],"x":"b"}
+```
 
+Simulate a slash command message post:
+```
+$> ./slack-payload-handler --debug-request true --debug-response true
+
+$> curl --location --request POST 'http://localhost:8080/' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'token=123' \
+--data-urlencode 'command=mycommand' \
+--data-urlencode 'dog=cat'
+
+{"command":"mycommand","dog":"cat","token":"123"}
 ```
 
 ## Test slack dummy payload
@@ -43,7 +58,6 @@ $> ./slack-payload-handler --debug-request true --debug-response true
 $> curl -k -X POST localhost:8080 --data-urlencode "payload=$(cat slack.test.json)"
 
 ```
-
 
 ## notes
 

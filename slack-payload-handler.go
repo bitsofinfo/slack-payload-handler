@@ -35,7 +35,7 @@ func init() {
 	// cmd line args
 	flag.IntVar(&listenPort, "listen-port", 8080, "Optional, port to listen on, default 8080")
 	flag.BoolVar(&debugRequest, "debug-request", false, "Optional, print requests to STDOUT, default false")
-	flag.BoolVar(&debugRequest, "debug-response", false, "Optional, print responses to STDOUT, default false")
+	flag.BoolVar(&debugResponse, "debug-response", false, "Optional, print responses to STDOUT, default false")
 
 	// logging options
 	log.SetFormatter(&log.JSONFormatter{})
@@ -96,55 +96,72 @@ func ProcessSlackRequest(resWriter http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// extract json from the payload
-	var jsonPayload map[string]interface{}
-	var rawData []byte = []byte(req.FormValue("payload"))
-	if rawData != nil && len(rawData) > 0 {
+	// what we will return
+	var responseMap map[string]interface{}
 
-		if debugRequest {
-			fmt.Printf("\nJSON RECEIVED: \n%s\n\n", rawData)
+	// is the POST for an slack interactive message? if so
+	// then the POST body is payload={data}
+	payloadVal := req.FormValue("payload")
+	if payloadVal != "" {
+		// extract json from the payload
+		var rawData []byte = []byte(req.FormValue("payload"))
+		if rawData != nil && len(rawData) > 0 {
+
+			if debugRequest {
+				fmt.Printf("\nJSON RECEIVED: \n%s\n\n", rawData)
+			}
+
+			// map all json data on the RHS of payload= into
+			// our responseMap
+			err = json.Unmarshal(rawData, &responseMap)
+			if err != nil {
+				fmt.Printf("Could not parse Slack 'payload' into JSON: \n%v\n\n", err)
+			}
+		} else {
+			log.Error("HTTP POST contained no FormData body where payload=[data]")
+			return
 		}
 
-		err = json.Unmarshal(rawData, &jsonPayload)
-		if err != nil {
-			fmt.Printf("Could not parse Slack 'payload' into JSON: \n%v\n\n", err)
+		if responseMap["actions"] == nil {
+			log.Error("HTTP POST JSON contained no 'actions' element'")
+			return
 		}
+
+		var actionValuesArr []string
+
+		var actionsArr []interface{} = responseMap["actions"].([]interface{})
+
+		for i := 0; i < len(actionsArr); i++ {
+			var actionMap map[string]interface{} = actionsArr[i].(map[string]interface{})
+			var theval string = actionMap["value"].(string)
+			actionValuesArr = append(actionValuesArr, theval)
+		}
+
+		responseMap["action_values"] = actionValuesArr
+
+		// is the POST for an slack slash command? if so
+		// then the POST body should contain ...&command=N&...
+	} else if req.FormValue("command") != "" {
+		responseMap = make(map[string]interface{})
+		for k, v := range req.PostForm {
+			responseMap[k] = v[0]
+		}
+
 	} else {
-		log.Error("HTTP POST contained no FormData body where payload=[data]")
-		return
+		fmt.Printf("POSTed body is unrecognized POST body contains neither: 'payload={}' OR '...&command=N&...' content")
 	}
-
-	if jsonPayload["actions"] == nil {
-		log.Error("HTTP POST JSON contained no 'actions' element'")
-		return
-	}
-
-	var actionValuesArr []string
-
-	var actionsArr []interface{} = jsonPayload["actions"].([]interface{})
-
-	for i := 0; i < len(actionsArr); i++ {
-		var actionMap map[string]interface{} = actionsArr[i].(map[string]interface{})
-		var theval string = actionMap["value"].(string)
-		actionValuesArr = append(actionValuesArr, theval)
-	}
-
-	jsonPayload["action_values"] = actionValuesArr
 
 	if debugResponse {
-		var jsonStr, err = json.Marshal(jsonPayload)
+		var jsonStr, err = json.Marshal(responseMap)
 		if err != nil {
-			fmt.Printf("Could not parse Slack 'payload' into JSON: \n %v", err)
+			fmt.Printf("Failed to process slack POST: \n %v", err)
 		} else if jsonStr != nil {
 			fmt.Printf("RESPONSE: \n%s", jsonStr)
 		}
-
 	}
-
-	log.Info(jsonPayload)
 
 	resWriter.Header().Set("Content-Type", "application/json")
 	resWriter.WriteHeader(http.StatusOK)
-	json.NewEncoder(resWriter).Encode(jsonPayload)
+	json.NewEncoder(resWriter).Encode(responseMap)
 
 }
