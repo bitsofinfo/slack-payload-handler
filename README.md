@@ -59,6 +59,10 @@ $> curl -k -X POST localhost:8080 --data-urlencode "payload=$(cat slack.test.jso
 
 ```
 
+## See an example of it in use
+
+https://github.com/bitsofinfo/cicdstatemgr/tree/master/examples/tekton
+
 ## notes
 
 https://github.com/nlopes/slack/pull/638
