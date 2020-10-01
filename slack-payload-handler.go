@@ -142,7 +142,9 @@ func ProcessSlackRequest(resWriter http.ResponseWriter, req *http.Request) {
 		// is the POST for an slack slash command? if so
 		// then the POST body should contain ...&command=N&...
 	} else if req.FormValue("command") != "" {
+		fmt.Println(req.PostForm)
 		for k, v := range req.PostForm {
+			fmt.Printf("%s %s\n", k, v[0])
 			responseMap[k] = v[0]
 		}
 
