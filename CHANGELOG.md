@@ -1,3 +1,6 @@
+# 1.5.1
+* Fix response debugging
+
 # 1.5.0
 * Add slack slash command support
 

@@ -97,7 +97,7 @@ func ProcessSlackRequest(resWriter http.ResponseWriter, req *http.Request) {
 	}
 
 	// what we will return
-	var responseMap map[string]interface{}
+	var responseMap = make(map[string]interface{})
 
 	// is the POST for an slack interactive message? if so
 	// then the POST body is payload={data}
@@ -142,7 +142,6 @@ func ProcessSlackRequest(resWriter http.ResponseWriter, req *http.Request) {
 		// is the POST for an slack slash command? if so
 		// then the POST body should contain ...&command=N&...
 	} else if req.FormValue("command") != "" {
-		responseMap = make(map[string]interface{})
 		for k, v := range req.PostForm {
 			responseMap[k] = v[0]
 		}
