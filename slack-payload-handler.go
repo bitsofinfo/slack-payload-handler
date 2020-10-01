@@ -97,7 +97,7 @@ func ProcessSlackRequest(resWriter http.ResponseWriter, req *http.Request) {
 	}
 
 	// what we will return
-	var responseMap = make(map[string]interface{})
+	responseMap := make(map[string]interface{})
 
 	// is the POST for an slack interactive message? if so
 	// then the POST body is payload={data}
@@ -142,10 +142,14 @@ func ProcessSlackRequest(resWriter http.ResponseWriter, req *http.Request) {
 		// is the POST for an slack slash command? if so
 		// then the POST body should contain ...&command=N&...
 	} else if req.FormValue("command") != "" {
-		fmt.Println(req.PostForm)
 		for k, v := range req.PostForm {
-			fmt.Printf("%s %s\n", k, v[0])
 			responseMap[k] = v[0]
+		}
+		jsonStr, err := json.Marshal(&responseMap)
+		if err != nil {
+			fmt.Printf("Failed to process slack POST: \n %v", err)
+		} else {
+			fmt.Printf("ONE: %s", jsonStr)
 		}
 
 	} else {
@@ -153,11 +157,13 @@ func ProcessSlackRequest(resWriter http.ResponseWriter, req *http.Request) {
 	}
 
 	if debugResponse {
-		var jsonStr, err = json.Marshal(responseMap)
+		jsonStr, err := json.Marshal(&responseMap)
 		if err != nil {
 			fmt.Printf("Failed to process slack POST: \n %v", err)
 		} else if jsonStr != nil {
 			fmt.Printf("RESPONSE: \n%s", jsonStr)
+		} else {
+			fmt.Printf("RESPONSE: \njsonstr nil? jsonStr=%s", jsonStr)
 		}
 	}
 
