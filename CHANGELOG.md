@@ -1,3 +1,6 @@
+# 1.5.2
+* Fix response debugging yet again
+
 # 1.5.1
 * Fix response debugging
 
