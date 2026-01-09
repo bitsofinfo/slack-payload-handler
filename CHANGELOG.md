@@ -1,3 +1,6 @@
+# 1.5.3
+* Bump golang of builder to 1.25.5
+
 # 1.5.2
 * Fix response debugging yet again
 

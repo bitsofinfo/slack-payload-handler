@@ -1,4 +1,4 @@
-FROM golang:1.13.4-alpine3.10 as builder
+FROM golang:1.25.5-alpine3.23 AS builder
 
 ARG GIT_TAG=master
 
@@ -17,4 +17,4 @@ FROM alpine:latest
 
 COPY --from=builder /opt/app/slack-payload-handler /usr/local/bin/slack-payload-handler
 
-CMD ["/usr/local/bin/slack-payload-handler"] 
+CMD ["/usr/local/bin/slack-payload-handler"]
